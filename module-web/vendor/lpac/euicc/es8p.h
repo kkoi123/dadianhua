@@ -1,0 +1,36 @@
+#pragma once
+
+#include "es10c.h"
+#include "euicc.h"
+
+struct es8p_metadata {
+    char iccid[(10 * 2) + 1];
+    char *serviceProviderName;
+    char *profileName;
+    enum es10c_icon_type iconType;
+    char *icon;
+    enum es10c_profile_class profileClass;
+    struct {
+        char **profileManagementOperation;
+        char *notificationAddress;
+    } notificationConfigurationInfo;
+    struct {
+        char *mccmnc;
+        char *gid1;
+        char *gid2;
+    } profileOwner;
+    struct {
+        char *dpOid;
+    } dpProprietaryData;
+    char **profilePolicyRules;
+    struct es8p_metadata_access_rule *accessRules;
+};
+
+struct es8p_metadata_access_rule {
+    char *certificateHash;
+    char *packageName;
+    struct es8p_metadata_access_rule *next;
+};
+
+int es8p_metadata_parse(struct es8p_metadata **metadata, const char *b64_Metadata);
+void es8p_metadata_free(struct es8p_metadata **stru_metadata);

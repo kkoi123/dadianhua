@@ -1,0 +1,57 @@
+#pragma once
+
+#include "es10b.h"
+#include "interface.h"
+
+#include <inttypes.h>
+#include <stdio.h>
+
+#ifdef interface
+#    undef interface
+#endif
+
+struct euicc_ctx {
+    const uint8_t *aid;
+    uint8_t aid_len;
+    uint8_t es10x_mss;
+    struct {
+        const struct euicc_apdu_interface *interface;
+        struct {
+            int logic_channel;
+            struct {
+                uint8_t apdu_header[5];
+                uint8_t body[255];
+            } __attribute__((packed)) request_buffer;
+        } _internal;
+        FILE *log_fp;
+    } apdu;
+    struct {
+        const struct euicc_http_interface *interface;
+        const char *server_address;
+        struct {
+            char subjectCode[8 + 1];
+            char reasonCode[8 + 1];
+            char subjectIdentifier[128 + 1];
+            char message[128 + 1];
+        } status;
+        struct {
+            char *transaction_id_http;
+            uint8_t *transaction_id_bin;
+            uint32_t transaction_id_bin_len;
+            char *b64_euicc_challenge;
+            char *b64_euicc_info_1;
+            struct es10b_authenticate_server_param *authenticate_server_param;
+            char *b64_authenticate_server_response;
+            struct es10b_prepare_download_param *prepare_download_param;
+            char *b64_prepare_download_response;
+            char *b64_bound_profile_package;
+            char *b64_cancel_session_response;
+        } _internal;
+        FILE *log_fp;
+    } http;
+    void *userdata;
+};
+
+int euicc_init(struct euicc_ctx *ctx);
+void euicc_fini(struct euicc_ctx *ctx);
+void euicc_http_cleanup(struct euicc_ctx *ctx);
